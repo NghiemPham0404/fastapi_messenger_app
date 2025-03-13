@@ -34,12 +34,17 @@ async def create_user(db : db_dependency, user_sign_up : UserCreate):
         user_in_db = UserInDB(**user_sign_up.model_dump(), hashed_password = bcrypt_context.hash(user_sign_up.password))
         return crud.create(db = db, obj_create=user_in_db)
 
+
+class OAuth2PasswordRequestFormEmail(BaseModel):
+    email: str
+    password: str
+
 @router.post("/token", 
             response_model=Token,
             status_code=status.HTTP_202_ACCEPTED,
             name="login for jwt token")
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db:db_dependency):
-    user = authenticate_user(form_data.username, form_data.password, db)
+async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestFormEmail, Depends()], db:db_dependency):
+    user = authenticate_user(form_data.email, form_data.password, db)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorized fail, email or password is incorrect")
     token = create_access_token(user.email, user.id, timedelta(hours=1))
