@@ -1,0 +1,14 @@
+1. Login, Logout, login và logout bởi Google 
+2. Kết bạn
+    2.1 Tìm kiếm
+    2.2 Nhấn nút kết bạn
+    2.3 Đồng ý kết bạn
+    2.4 Hủy kết bạn
+3. Chat
+    3.1. Các chức năng chung
+        Lấy hết tất cả tin nhắn của một cuộc hội thoại
+        Gửi tin nhắn cho tất cả những người trong cuộc hội thoại
+        Chỉnh sửa tin nhắn (chỉ sửa được tin nhắn của mình, trong vòng 1 tiếng)
+        Xóa tin nhắn (chỉ xóa được tin nhắn của mình, tỏng vòng 1 tiếng, vẫn lưu lại rằng đã bị xóa)
+    3.1. Chat riêng (Nhóm chat không có tên, chỉ có 2 người, tên nhóm sẽ là tên của đối phương - xử lý ở front end)
+    3.2. Tạo nhóm chat (Phải điền tên nhóm, có thể add nhiều người cùng lúc - xử lý ở frontend)
