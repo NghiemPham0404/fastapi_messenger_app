@@ -14,7 +14,7 @@ from security import get_current_user
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 
 @router.get("/", response_model = List[UserOut],name="Lấy các liên hệ của một người")
-def get_user_contact(user : Annotated[UserOut, Depends(get_current_user)], db : Session = Depends(get_db)):
+async def get_user_contact(user : Annotated[UserOut, Depends(get_current_user)], db : Session = Depends(get_db)):
     user_id = user.id
     return (db.query(User)
         .join(Contact, User.id == Contact.contact_user_id)
@@ -28,7 +28,7 @@ def get_user_contact(user : Annotated[UserOut, Depends(get_current_user)], db : 
     )
 
 @router.post("/", response_model=ContactOut, name="Gửi kết bạn")
-def send_contact_request(contactCreate : ContactCreate, user : Annotated[UserOut, Depends(get_current_user)], db : Session = Depends(get_db)):
+async def send_contact_request(contactCreate : ContactCreate, user : Annotated[UserOut, Depends(get_current_user)], db : Session = Depends(get_db)):
     if(user.id != contactCreate.user_id):
         raise HTTPException(status_code=401, detail = "Not Authorized")
     contact_user_id = contactCreate.contact_user_id
@@ -38,7 +38,7 @@ def send_contact_request(contactCreate : ContactCreate, user : Annotated[UserOut
     return crud.create(db, contactCreate)
 
 @router.get("/pending", response_model = List[UserOut],name="Lấy danh sách những người đang muốn kết bạn với 1 người")
-def get_user_contact(user : Annotated[UserOut, Depends(get_current_user)], db : Session = Depends(get_db)):
+async def get_user_contact(user : Annotated[UserOut, Depends(get_current_user)], db : Session = Depends(get_db)):
     user_id = user.id
     return (db.query(User)
         .join(Contact, User.id == Contact.user_id)
@@ -47,7 +47,7 @@ def get_user_contact(user : Annotated[UserOut, Depends(get_current_user)], db : 
     )
 
 @router.put("/{contact_id}", response_model=ContactOut, name="Chấp nhận kết bạn")
-def accept_contact_request(contactUpdate: ContactUpdate, user : Annotated[UserOut, Depends(get_current_user)], db : Session = Depends(get_db)):
+async def accept_contact_request(contactUpdate: ContactUpdate, user : Annotated[UserOut, Depends(get_current_user)], db : Session = Depends(get_db)):
     if(user.id != contactUpdate.contact_user_id):
         raise HTTPException(status_code=401, detail = "Not Authorized")
     contact = crud.get_one(db, crud._model.user_id == contactUpdate.user_id, 
@@ -60,7 +60,7 @@ def accept_contact_request(contactUpdate: ContactUpdate, user : Annotated[UserOu
 
 
 @router.delete("/{other_user_id}", response_model=ContactOut, name="Xóa bạn, Xóa kết bạn")
-def delete_contact_request(user : Annotated[UserOut, Depends(get_current_user)], other_user_id : int, db : Session = Depends(get_db)):
+async def delete_contact_request(user : Annotated[UserOut, Depends(get_current_user)], other_user_id : int, db : Session = Depends(get_db)):
     user_id = user.id
     contact = db.query(Contact).filter(
         or_(
