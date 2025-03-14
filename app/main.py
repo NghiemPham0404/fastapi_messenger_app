@@ -11,8 +11,10 @@ from routes.v1.message import router as message_router
 from routes.v1.contact import router as contact_router
 from middleware import JWTAuthMiddleware
 from fastapi.openapi.utils import get_openapi
-from security import oauth2_bearer
 from routes.v1.websocket import getChatRoomsManager,ChatRoomManager
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 

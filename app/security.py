@@ -8,15 +8,13 @@ from starlette import status
 from db.database import SessionLocal, get_db
 from models import users
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, OAuth2PasswordRequestForm, OAuth2PasswordBearer, HTTPBearer
 from jose import jwt, JWTError
 from crud.user import crud
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
-
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
+http_bearer = HTTPBearer()
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated = 'auto')
 
 def create_access_token(email : str, user_id: int, expires_delta: timedelta):
@@ -25,9 +23,10 @@ def create_access_token(email : str, user_id: int, expires_delta: timedelta):
     encode.update({'exp': expires})
     return jwt.encode(encode, os.getenv('SECRET_KEY'), algorithm=os.getenv('ALGORITHM'))
 
-async def get_current_user(token : Annotated[str, Depends(oauth2_bearer)], db:Annotated[Session, Depends(get_db)]):
+async def get_current_user(token_bearer: HTTPAuthorizationCredentials = Depends(http_bearer), db:Session= Depends(get_db)):
     try:
-        print(token)
+        print(token_bearer.credentials)
+        token = token_bearer.credentials 
         payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=os.getenv('ALGORITHM'))
         email : str = payload.get('sub')
         user_id: int = payload.get('id')
