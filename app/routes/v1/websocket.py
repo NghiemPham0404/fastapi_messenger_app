@@ -22,9 +22,10 @@ class ChatRoomManager():
 
     async def broadcast(self, conversation_id : int, message: MessageBaseExtended):
         if conversation_id in self.chat_rooms:
+            
             for websocket in self.chat_rooms[conversation_id]:
                 print(message)
-                websocket.send_text(message)
+                websocket.send_text(message.model_dump_json())
 
 
 manager = ChatRoomManager()

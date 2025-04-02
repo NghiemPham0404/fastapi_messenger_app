@@ -23,6 +23,6 @@ class MessageBaseExtended(MessageBase):
     name: Optional[str] = None
     avatar: Optional[str] = None 
     message: Optional[str] = None
-    timestamp: Optional[datetime.datetime] = datetime.datetime.now
+    timestamp: Optional[datetime.datetime]
     model_config = ConfigDict(from_attributes=True)
     cp_id: int = None
