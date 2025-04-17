@@ -53,7 +53,7 @@ async def create_user(db : Annotated[Session, Depends(get_db)],
             response_model=Token,
             status_code=status.HTTP_202_ACCEPTED,
             name="login for jwt token")
-async def login_for_access_token(form_data : Annotated[LoginWithEmailForm, Depends()], 
+async def login_for_access_token(form_data : LoginWithEmailForm, 
                                  db:Annotated[Session, Depends(get_db)]):
     # authenticate user
     user = authenticate_user(form_data.email, form_data.password, db)

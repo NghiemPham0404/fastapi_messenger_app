@@ -6,7 +6,7 @@ from db.database import get_db
 from models.messages import Message
 from models.users import User
 from models.conversation_people import ConversationPeople
-from schemas.message_base import MessageCreate, MessageUpdate, MessageInDB, MessageBaseExtended
+from schemas.message_base import MessageCreate, MessageUpdate, MessageInDB, MessageOut
 from crud.message import crud
 from crud.conversation_people import crud as con_peo_repo
 from typing import Annotated, List
@@ -15,7 +15,7 @@ from typing import Annotated, List
 router = APIRouter(prefix="/messages", tags=["messages"])
 
 @router.post("/", 
-             response_model=MessageBaseExtended)
+             response_model=MessageOut)
 async def send_message(message_create : MessageCreate, 
                        db: Annotated[Session, Depends(get_db)], 
                        room_manager: Annotated[ChatRoomManager ,Depends(getChatRoomsManager)]):
@@ -25,12 +25,12 @@ async def send_message(message_create : MessageCreate,
     # Extract user_id and conversation_id and message from the request body
     user_id = message_create.user_id
     conversation_id = message_create.conversation_id
-    message_text = message_create.message
+    message_text = message_create.content
     # Check if the conversation exists in the database
     cp_id = con_peo_repo.get_one(db, con_peo_repo._model.user_id == user_id, con_peo_repo._model.conversation_id == conversation_id).id
     if not cp_id:
         raise HTTPException(status_code=404, detail="Conversation people not found")
-    message_in_db = MessageInDB(cp_id=cp_id, message=message_text)
+    message_in_db = MessageInDB(cp_id=cp_id, content=message_text)
     message = crud.create(db, message_in_db)
     # extend message to include user name and avatar
     message_extended = convert_to_message_extend(message.id, db)
@@ -39,7 +39,7 @@ async def send_message(message_create : MessageCreate,
         await room_manager.broadcast(conversation_id, message_extended)
     return message_extended
 
-@router.put("/", response_model=MessageBaseExtended)
+@router.put("/", response_model=MessageOut)
 async def update_message(message_id: Annotated[int, Path(description="message id")],
                          message_update: MessageUpdate, 
                          db: Annotated[Session, Depends(get_db)], 
@@ -61,7 +61,7 @@ async def update_message(message_id: Annotated[int, Path(description="message id
     return message_extended
 
 @router.delete("/{message_id}", 
-               response_model=MessageBaseExtended)
+               response_model=MessageOut)
 async def delete_message(message_id: Annotated[int, Path(description="message id")],
                          db: Annotated[Session, Depends(get_db)], 
                          room_manager: Annotated[ChatRoomManager , Depends(getChatRoomsManager)]):
@@ -82,11 +82,11 @@ async def delete_message(message_id: Annotated[int, Path(description="message id
         room_manager.broadcast(message_extended.conversation_id, message_extended)
     return message_extended
 
-def convert_to_message_extend(message_id : id, db:Session) -> MessageBaseExtended:
+def convert_to_message_extend(message_id : id, db:Session) -> MessageOut:
     return (db.query(
         Message.id,
-        Message.cp_id, 
-        Message.message, 
+        Message.cp_id,
+        Message.content, 
         Message.timestamp, 
         User.name, 
         User.avatar,

@@ -4,7 +4,7 @@ from db.database import get_db
 from fastapi import APIRouter,Depends, HTTPException, Path, status
 from schemas.conversation_base import *
 from schemas.user_base import UserOut
-from schemas.message_base import MessageBaseExtended
+from schemas.message_base import MessageOut
 from crud.conversation import crud
 from crud.user import crud as user_repo
 from crud.conversation_people import crud as con_peo_repo
@@ -101,7 +101,7 @@ def get_people(conversation_id : Annotated[int, Path(description="conversation i
 
 
 @router.get("/{conversation_id}/messages", 
-            response_model=List[MessageBaseExtended])
+            response_model=List[MessageOut])
 async def get_conversation_messages(conversation_id : Annotated[int, Path(description="conversation id")],
                                     skip: int = 0, 
                                     limit: int = 50, 
