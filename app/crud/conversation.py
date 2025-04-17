@@ -1,11 +1,11 @@
 from typing import List
 from schemas.conversation_base import *
-from models.conversations import Conversations
+from models.conversations import Conversation
 from sqlalchemy.orm import Session
 from crud.base import CRUDRepository
 from models.users import User
 from models.messages import Message
-from models.conversations import Conversations
+from models.conversations import Conversation
 from models.conversation_people import ConversationPeople
 
 class ConversationRepository(CRUDRepository):
@@ -15,11 +15,13 @@ class ConversationRepository(CRUDRepository):
                                     limit: int, 
                                     start : str, 
                                     end : str, 
-                                    db:Session) -> List[MessageBaseExtended]:
+                                    db:Session) -> List[MessageOut]:
 
         return (
-        db.query(Message.cp_id, 
-        Message.message, 
+        db.query(
+        Message.id,
+        Message.cp_id, 
+        Message.content, 
         Message.timestamp, 
         User.name, 
         User.avatar)
@@ -30,10 +32,10 @@ class ConversationRepository(CRUDRepository):
             Message.timestamp >= start,
             Message.timestamp <= end
         )
-        .order_by(Message.timestamp.desc())
+        # .order_by(Message.timestamp.desc())
         .offset(skip)
         .limit(limit)
         .all()
         )
 
-crud = ConversationRepository(model=Conversations)
+crud = ConversationRepository(model=Conversation)
