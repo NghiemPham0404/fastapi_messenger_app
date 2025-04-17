@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from schemas.message_base import MessageBaseExtended
+from schemas.message_base import MessageOut
 from schemas.conversation_people_base import ConversationPeopleBase
 
 class ConversationBase(BaseModel):
@@ -19,6 +19,6 @@ class ConversationInDB(ConversationBase):
     pass
 
 class ConversationBaseExtend(ConversationBase):
-    messages : list[MessageBaseExtended]
+    messages : list[MessageOut]
     participants : list[ConversationPeopleBase]
     pass
