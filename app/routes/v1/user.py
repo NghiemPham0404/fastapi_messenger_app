@@ -1,10 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Annotated
+import cloudinary
+import cloudinary.uploader
+from fastapi import APIRouter, Depends, File, HTTPException, Path, UploadFile, status
 from sqlalchemy.orm import Session
 from db.database import get_db
 from schemas.user_base import UserCreate, UserOut, UserUpdate, UserInDB
+from schemas.conversation_base import ConversationOut
 from crud.user import crud
 from security import bcrypt_context, get_current_user
-
+from config import load_cloudinay_config
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -76,6 +80,37 @@ async def update_user_endpoint(user_id: int,
     user_in_db = UserInDB(**user_update.model_dump(), hashed_password = bcrypt_context.hash(user_update.password))
     return crud.update(db, user, user_in_db)
 
+@router.put("/{user_id}/avatar")
+def update_user_avatar_endpoint( 
+                           avatar: Annotated[UploadFile, File(max=1024*5)],
+                           user: UserInDB = Depends(get_current_user), 
+                           db: Session = Depends(get_db)):
+    """
+    Update user avatar by id
+    """
+    
+    # check if user exists in db
+    user = crud.get_one(db, crud._model.id == user.id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    # update user avatar
+    # upload image to cloudinary
+    load_cloudinay_config()
+    upload_result = cloudinary.uploader.upload(
+        avatar.file,
+        use_filename = True,
+        resource_type="image",
+        filename=avatar.filename,
+        folder="avatar",
+    )
+    if upload_result.get("secure_url") is None:
+        raise HTTPException(status_code=400, detail="Could not upload image")
+    else:
+        url = upload_result.get("url")
+        filename = url.split("/")[-1]
+        crud.update(db, user, UserInDB(avatar=filename))
+    return user
+
 
 @router.delete("/{user_id}")
 async def delete_user_endpoint(user_id: int, 
@@ -90,3 +125,13 @@ async def delete_user_endpoint(user_id: int,
     # delete user
     crud.delete(db, user)
     return {"message": "User deleted"}
+
+@router.get("/{user_id}/conversations"
+            ,response_model=list[ConversationOut])
+async def get_user_conversations(db: Session = Depends(get_db), 
+                                  user: UserInDB = Depends(get_current_user)
+                                  ):
+    """
+    Get all conversations that a user have joined
+    """
+    return crud.get_user_conversations(db, user.id)

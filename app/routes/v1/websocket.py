@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import WebSocket
-from schemas.message_base import MessageBaseExtended
+from schemas.message_base import MessageOut
 
 
 class ChatRoomManager():
@@ -12,7 +12,6 @@ class ChatRoomManager():
         if conversation_id in self.chat_rooms:
             self.chat_rooms[conversation_id].append(websocket)
         self.chat_rooms[conversation_id] = [websocket]
-        
 
     def disconnect(self, conversation_id: int, websocket: WebSocket):
         if conversation_id in self.chat_rooms:
@@ -20,7 +19,7 @@ class ChatRoomManager():
             if len(self.chat_rooms[conversation_id]) == 0:
                 del self.chat_rooms[conversation_id]
 
-    async def broadcast(self, conversation_id : int, message: MessageBaseExtended):
+    async def broadcast(self, conversation_id : int, message: MessageOut):
         if conversation_id in self.chat_rooms:
             
             for websocket in self.chat_rooms[conversation_id]:
