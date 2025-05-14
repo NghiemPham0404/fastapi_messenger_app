@@ -2,15 +2,15 @@ from datetime import timedelta, datetime
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from schemas.user_base import UserCreate, UserInDB, UserOut
+from .schemas.user_base import UserCreate, UserInDB, UserOut
 from sqlalchemy.orm import Session
 from starlette import status
-from db.database import SessionLocal, get_db
-from models import users
+from .db.database import SessionLocal, get_db
+from .models import users
 from passlib.context import CryptContext
 from fastapi.security import HTTPAuthorizationCredentials, OAuth2PasswordRequestForm, OAuth2PasswordBearer, HTTPBearer
 from jose import jwt, JWTError
-from crud.user import crud
+from .crud.user import crud
 import os
 
 # http_bearer for authentication

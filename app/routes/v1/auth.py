@@ -2,13 +2,13 @@ from datetime import timedelta
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Form
 from pydantic import BaseModel
-from schemas.user_base import UserCreate, UserInDB, UserOut
+from ...schemas.user_base import UserCreate, UserInDB, UserOut
 from sqlalchemy.orm import Session
 from starlette import status
-from db.database import get_db
+from ...db.database import get_db
 from fastapi.security import OAuth2PasswordRequestForm
-from crud.user import crud
-from security import bcrypt_context, authenticate_user, create_access_token, create_refresh_token, decode_refresh_token
+from ...crud.user import crud
+from ...security import bcrypt_context, authenticate_user, create_access_token, create_refresh_token, decode_refresh_token, get_current_user
 
 router = APIRouter(
     prefix="/auth",
@@ -63,6 +63,13 @@ async def login_for_access_token(form_data : LoginWithEmailForm,
     token = create_access_token(user.email, user.id)
     refresh_token = create_refresh_token(user.id)
     return {'access_token':token, 'token_type':'bearer', 'refresh_token':refresh_token}
+
+@router.get("/info",
+            response_model=UserOut)
+async def get_user_info(user: UserOut = Depends(get_current_user)):
+    return user
+
+
 
 
 @router.post("/refresh")

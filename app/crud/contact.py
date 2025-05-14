@@ -1,9 +1,8 @@
 from sqlalchemy import or_
-from models.users import User
-from crud.base import CRUDRepository
-from models.contacts import Contact
-
 from sqlalchemy.orm import Session
+from ..models.users import User
+from ..crud.base import CRUDRepository
+from ..models.contacts import Contact
 
 class ContactRepository(CRUDRepository):
 
