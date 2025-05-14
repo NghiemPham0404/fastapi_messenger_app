@@ -1,12 +1,12 @@
 from typing import List
-from schemas.conversation_base import *
-from models.conversations import Conversation
+from ..schemas.conversation_base import *
+from ..models.conversations import Conversation
 from sqlalchemy.orm import Session
-from crud.base import CRUDRepository
-from models.users import User
-from models.messages import Message
-from models.conversations import Conversation
-from models.conversation_people import ConversationPeople
+from ..crud.base import CRUDRepository
+from ..models.users import User
+from ..models.messages import Message
+from ..models.conversations import Conversation
+from ..models.conversation_people import ConversationPeople
 
 class ConversationRepository(CRUDRepository):
     def get_conversation_messages(self,
@@ -22,7 +22,8 @@ class ConversationRepository(CRUDRepository):
         Message.id,
         Message.cp_id, 
         Message.content, 
-        Message.timestamp, 
+        Message.timestamp,
+        User.id.label("user_id"), 
         User.name, 
         User.avatar)
         .join(ConversationPeople, Message.cp_id == ConversationPeople.id)
@@ -32,7 +33,7 @@ class ConversationRepository(CRUDRepository):
             Message.timestamp >= start,
             Message.timestamp <= end
         )
-        # .order_by(Message.timestamp.desc())
+        .order_by(Message.timestamp.desc())
         .offset(skip)
         .limit(limit)
         .all()

@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
-from db.database import get_db
+from ...db.database import get_db
 from fastapi import APIRouter,Depends, HTTPException, status
-from crud.conversation import crud as conversation_repo
-from crud.user import crud as user_repo
-from crud.conversation_people import crud
+from ...crud.conversation import crud as conversation_repo
+from ...crud.user import crud as user_repo
+from ...crud.conversation_people import crud
 from typing import Annotated, List
-from schemas.conversation_people_base import *
+from ...schemas.conversation_people_base import *
 
 
 router = APIRouter(prefix="/conversation_people", tags=["conversation peoples"])

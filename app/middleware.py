@@ -11,9 +11,12 @@ ALGORITHM = os.getenv("ALGORITHM", "HS256")
 # Middleware check if the Authorization is valid
 class JWTAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        if request.url.path in ["/auth/token", "/sign-up", "/docs","/openapi.json"]:  
+        if request.scope["type"] == "websocket":
+            return await call_next(request)
+        if request.url.path in ["/auth/token", "/sign-up", "/auth/refresh", "/docs","/openapi.json"]:  
             # Allow these endpoints without authentication
             return await call_next(request)
+
 
         # Get Authorization header
         auth_header = request.headers.get("Authorization")

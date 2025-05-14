@@ -20,6 +20,7 @@ class MessageInDB(MessageBase):
 class MessageOut(MessageBase):
     id : Optional[int] = None
     conversation_id : Optional[int] = None 
+    user_id : Optional[int] = None 
     name: Optional[str] = None
     avatar: Optional[str] = None 
     content: Optional[str] = None
