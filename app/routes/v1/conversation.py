@@ -1,15 +1,15 @@
 import datetime
 from sqlalchemy.orm import Session
-from db.database import get_db
+from ...db.database import get_db
 from fastapi import APIRouter,Depends, HTTPException, Path, status
-from schemas.conversation_base import *
-from schemas.user_base import UserOut
-from schemas.message_base import MessageOut
-from crud.conversation import crud
-from crud.user import crud as user_repo
-from crud.conversation_people import crud as con_peo_repo
+from ...schemas.conversation_base import *
+from ...schemas.user_base import UserOut
+from ...schemas.message_base import MessageOut
+from ...crud.conversation import crud
+from ...crud.user import crud as user_repo
+from ...crud.conversation_people import crud as con_peo_repo
 from typing import Annotated, List
-
+from ...encrypt_message import decrypt_message
 
 router = APIRouter(prefix="/conversations", 
                    tags=["conversations"])
@@ -106,14 +106,23 @@ async def get_conversation_messages(conversation_id : Annotated[int, Path(descri
                                     skip: int = 0, 
                                     limit: int = 50, 
                                     start : str = "1970-01-01 00:00:00", 
-                                    end : str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S %z"), 
+                                    end : str = None, 
                                     db:Session = Depends(get_db)):
     """
     Get messages in a conversation by id
     """
+    end = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S %z") if end is None else end
     # check if conversation exists in db
     conversation = crud.get_one(db, crud._model.id == conversation_id)
     if not conversation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    
     # get messages in conversation
-    return crud.get_conversation_messages(conversation_id, skip, limit, start, end, db)
+    messages = crud.get_conversation_messages(conversation_id, skip, limit, start, end, db)
+    messages.sort(key= lambda msg : msg.timestamp)
+    decrypt_messages = []
+    for message in messages :
+        message_out = MessageOut.model_validate(message);    
+        message_out.content=decrypt_message(message.content)
+        decrypt_messages.append(message_out)
+    return decrypt_messages

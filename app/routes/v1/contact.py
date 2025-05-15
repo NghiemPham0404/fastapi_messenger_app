@@ -2,14 +2,14 @@ from typing import Annotated, List
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
-from db.database import get_db
-from models.contacts import Contact
-from models.users import User
-from schemas.contact_base import *
-from schemas.user_base import UserOut
-from crud.contact import crud
-from crud.user import crud as user_repo
-from security import get_current_user
+from ...db.database import get_db
+from ...models.contacts import Contact
+from ...models.users import User
+from ...schemas.contact_base import *
+from ...schemas.user_base import UserOut
+from ...crud.contact import crud
+from ...crud.user import crud as user_repo
+from ...security import get_current_user
 
 
 router = APIRouter(prefix="/contacts", 

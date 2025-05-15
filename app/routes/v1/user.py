@@ -1,14 +1,14 @@
 from typing import Annotated
 import cloudinary
 import cloudinary.uploader
-from fastapi import APIRouter, Depends, File, HTTPException, Path, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Path, Query, UploadFile, status
 from sqlalchemy.orm import Session
-from db.database import get_db
-from schemas.user_base import UserCreate, UserOut, UserUpdate, UserInDB
-from schemas.conversation_base import ConversationOut
-from crud.user import crud
-from security import bcrypt_context, get_current_user
-from config import load_cloudinay_config
+from ...db.database import get_db
+from ...schemas.user_base import UserCreate, UserOut, UserUpdate, UserInDB
+from ...schemas.conversation_base import ConversationOut
+from ...crud.user import crud
+from ...security import bcrypt_context, get_current_user
+from ...config import load_cloudinay_config
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -29,27 +29,37 @@ async def create_user_endpoint(user_create: UserCreate,
                                 detail=f"The user with this {user_create.email} already exists \in the system")
 
 
-@router.get("/", response_model=list[UserOut])
-async def get_users_endpoint(skip: int = 0, 
-                             limit: int = 20, 
-                             db: Session = Depends(get_db)):
-    """
-    Get users
-    """
-    return crud.get_many(db = db, skip=skip, limit=limit)
+# @router.get("/", response_model=list[UserOut])
+# async def get_users_endpoint(skip: int = 0, 
+#                              limit: int = 20, 
+#                              db: Session = Depends(get_db)):
+#     """
+#     Get users
+#     """
+#     return crud.get_many(db = db, skip=skip, limit=limit)
 
 
-@router.get("/search", 
+@router.get("/", 
             response_model=list[UserOut])
-async def get_users_endpoint(query : str,
+async def get_users_endpoint(query : Annotated[str, Query()] = "",
                              skip: int = 0, 
                              limit: int = 20, 
-                             db: Session = Depends(get_db)):
+                             db: Session = Depends(get_db),
+                             ):
     """
     Get users by query
     """
     return crud.get_many(db, crud._model.name.like(f"%{query}%") , skip=skip, limit=limit)
 
+@router.get("/conversations"
+            ,response_model=list[ConversationOut])
+async def get_user_conversations(db: Session = Depends(get_db), 
+                                  user: UserOut = Depends(get_current_user)
+                                  ):
+    """
+    Get all conversations that a user have joined
+    """
+    return crud.get_user_conversations(db, user.id)
 
 @router.get("/{user_id}", 
             response_model=UserOut)
@@ -125,13 +135,3 @@ async def delete_user_endpoint(user_id: int,
     # delete user
     crud.delete(db, user)
     return {"message": "User deleted"}
-
-@router.get("/{user_id}/conversations"
-            ,response_model=list[ConversationOut])
-async def get_user_conversations(db: Session = Depends(get_db), 
-                                  user: UserInDB = Depends(get_current_user)
-                                  ):
-    """
-    Get all conversations that a user have joined
-    """
-    return crud.get_user_conversations(db, user.id)

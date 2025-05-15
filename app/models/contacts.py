@@ -1,4 +1,4 @@
-from db.database import Base
+from ..db.database import Base
 from sqlalchemy import Integer, Column, ForeignKey
 
 class Contact(Base):

@@ -9,6 +9,7 @@ class ContactCreate(ContactBase):
     pass
 
 class ContactUpdate(ContactBase):
+    status : int
     pass
 
 class ContactOut(ContactBase):
@@ -17,6 +18,6 @@ class ContactOut(ContactBase):
     model_config = ConfigDict(from_attributes=True)
 
 class ContactInDB(ContactCreate):
-    status : Optional[int] = 0
     id : Optional[int] = None
+    status : Optional[int] = 0
 

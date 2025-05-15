@@ -1,9 +1,9 @@
 from typing import List
-from crud.base import CRUDRepository
-from models.users import User
-from models.conversations import Conversation
-from models.conversation_people import ConversationPeople
 from sqlalchemy.orm import Session
+from .base import CRUDRepository
+from ..models.users import User
+from ..models.conversations import Conversation
+from ..models.conversation_people import ConversationPeople
 
 class UserRepository(CRUDRepository):
     def find_user_by_email(self, db: Session, email: str) -> User:
