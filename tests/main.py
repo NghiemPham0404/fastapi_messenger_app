@@ -1,6 +1,7 @@
-from cryptography.fernet import Fernet
 from dotenv import load_dotenv
+from cryptography.fernet import Fernet
 import os
+
 
 
 load_dotenv()
@@ -9,11 +10,6 @@ key = os.getenv("SECRET_KEY_FERNET")
 # print(key)
 fernet = Fernet(key)
 
-# Encrypt
-def encrypt_message(original_str : str) -> str:
-    encrypted_bytes:str = fernet.encrypt(original_str.encode())
-    return encrypted_bytes.decode()
-
 # Decrypt
 def decrypt_message(encrypted_str : str) -> str:
     # print(encrypted_str)
@@ -21,3 +17,4 @@ def decrypt_message(encrypted_str : str) -> str:
     decrypted_str = fernet.decrypt(encrypted_bytes).decode()
     return decrypted_str
 
+print(decrypt_message("gAAAAABoG3lV8RsSPxqPrHjYPCQoD69cKY6Sy0PoL3PyTuFqiimO1fGf9R_zuL6ysPEJupSYgDWyIhU2VOr8COOrzMeKTmz8Aw=="))

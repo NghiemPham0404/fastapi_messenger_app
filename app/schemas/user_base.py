@@ -1,6 +1,5 @@
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from schemas.conversation_base import ConversationBaseExtend
 
 class UserBase(BaseModel):
     name : Optional[str] = None
