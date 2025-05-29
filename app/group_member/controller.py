@@ -49,11 +49,12 @@ async def add_member_to_group(group_id : Annotated[int,  Path()],
     
     # finally create group_people
     group_people_in_db = GroupMemberInDB(**group_people_create.model_dump())
-    return crud.create(db, group_people_in_db)
+    group_member =  crud.create(db, group_people_in_db)
+    return ObjectResponse(result=group_member)
 
 
 @router.delete("/{group_id}/members/{group_member_id}", 
-               response_class=MessageResponse)
+               response_model=MessageResponse)
 async def delete_member_from_group(db : Annotated[Session , Depends(get_mysql_db)],
                                    group_id : Annotated[int,  Path()],
                                    group_member_id : Annotated[int , Path()]
