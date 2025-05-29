@@ -1,0 +1,119 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(300deg, black 90%, #005522);
+  color: #fff;
+}
+
+.banner {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 200px;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+}
+
+.left {
+  flex: 1 1 50%;
+  max-width: 600px;
+}
+
+.left h1 {
+  font-size: 64px;
+  margin-bottom: 10px;
+}
+
+.left h2 {
+  font-size: 48px;
+  font-weight: normal;
+  margin: 0 0 30px;
+}
+
+.left p {
+  font-size: 20px;
+  line-height: 1.5;
+  max-width: 500px;
+  margin-bottom: 40px;
+}
+
+.left button {
+  padding: 15px 30px;
+  font-size: 18px;
+  background: linear-gradient(#0bdd00, #0bddc3);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.right {
+  flex: 1 1 40%;
+  max-width: 400px;
+  margin-top: 40px;
+}
+
+.phone {
+  width: 100%;
+  background: white;
+  border-radius: 30px;
+  padding: 20px;
+  box-sizing: border-box;
+  color: #000;
+}
+
+.chat-bubble {
+  background: #e0e0e0;
+  padding: 10px 15px;
+  border-radius: 15px;
+  margin: 10px 0;
+  max-width: 80%;
+}
+
+.chat-bubble.sent {
+  background: #0bdd00;
+  color: white;
+  align-self: flex-start;
+}
+
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+  .banner {
+    flex-direction: column;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .left, .right {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .left h1 {
+    font-size: 40px;
+  }
+
+  .left h2 {
+    font-size: 28px;
+  }
+
+  .left p {
+    font-size: 16px;
+  }
+
+  .right {
+    margin-top: 20px;
+  }
+
+  .phone {
+    border-radius: 20px;
+    padding: 15px;
+  }
+
+  .chat-bubble {
+    font-size: 14px;
+    max-width: 90%;
+  }
+}

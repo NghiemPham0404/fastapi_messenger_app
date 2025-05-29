@@ -20,4 +20,3 @@ def decrypt_message(encrypted_str : str) -> str:
     encrypted_bytes = encrypted_str.encode()
     decrypted_str = fernet.decrypt(encrypted_bytes).decode()
     return decrypted_str
-
