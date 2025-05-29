@@ -26,7 +26,7 @@ def get_mysql_db():
         db.close()
 
 
-MONGO_URL = "mongodb+srv://nghiempham0404:tiemin7418520@cluster0.w1nqq8t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+MONGO_URL = os.getenv("MONGO_DB_URL")
 client = AsyncIOMotorClient(MONGO_URL)
 mongodb = client["chatting_app"]
 message_collection = mongodb["messages"]
