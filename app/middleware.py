@@ -11,16 +11,24 @@ ALGORITHM = os.getenv("ALGORITHM", "HS256")
 # Middleware check if the Authorization is valid
 class JWTAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        if request.scope["type"] == "websocket":
+        path = request.url.path
+
+        # Allow these endpoints without authentication
+        if path.startswith("/static/"):
             return await call_next(request)
-        if request.url.path in ["/auth/token", "/sign-up", "/auth/refresh", "/docs","/openapi.json"]:  
-            # Allow these endpoints without authentication
+        
+        # break part to parts 'api/user/1' = > ['api', 'user', '1']
+        path_parts = request.url.path.strip("/").split("/") 
+        # skip the versioning 'api/user/1' => '/user/1'
+        sub_path = "/" + "/".join(path_parts[1:])
+
+        # skip the public enpoint
+        if sub_path in ["/","/docs", "/openapi.json","/favicon.ico","/auth/token","/auth/sign-up","/auth/refresh"]: 
             return await call_next(request)
 
 
         # Get Authorization header
         auth_header = request.headers.get("Authorization")
-        print(auth_header)
         if not auth_header or not auth_header.startswith("Bearer "):
             return JSONResponse(status_code=401, content={"detail": "Not authenticated"})
 

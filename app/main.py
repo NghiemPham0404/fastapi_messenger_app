@@ -1,17 +1,24 @@
-from fastapi import FastAPI,  Depends, WebSocket, WebSocketDisconnect, status
-from fastapi.responses import HTMLResponse
-from fastapi.security import OAuth2PasswordBearer
-from .db.database import engine, Base
+from fastapi import FastAPI,  Depends, Path, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from .database import engine, Base
 from .api import include_routes
 from .middleware import configure_middleware
-from fastapi.openapi.utils import get_openapi
-from .routes.v1.websocket import getChatRoomsManager,ChatRoomManager
+from .websocket import getChatRoomsManager,ChatRoomManager
 from dotenv import load_dotenv
+from .config import custom_openapi
 
 # load the enviroments variable
 load_dotenv()
 
 app = FastAPI()
+
+# static folder
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# templates folder
+templates = Jinja2Templates("templates")
 
 # add middle ware
 configure_middleware(app)
@@ -23,34 +30,8 @@ include_routes(app)
 # create entities in database or migrate database
 Base.metadata.create_all(bind=engine)
 
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
-        title="My API",
-        version="1.0.0",
-        description="This API requires authentication via JWT token",
-        routes=app.routes,
-    )
-    openapi_schema["components"]["securitySchemes"] = {
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT"
-        }
-    }
-    # openapi_schema["security"] = [{"BearerAuth": []}]
-    for route in app.routes:
-        if route.path not in ["/auth/token", "/auth/sign-up","/auth/refresh","/docs", "/openapi.json"]:
-            if hasattr(route, "operation_id"):
-                path = openapi_schema["paths"][route.path]
-                for method in path:
-                    path[method]["security"] = [{"BearerAuth": []}]
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-app.openapi = custom_openapi
-
+# openapi config for swagger-ui
+app.openapi = lambda : custom_openapi(app)
 
 # configure websocket
 @app.websocket("/ws/{conversation_id}/{user_id}")
@@ -66,8 +47,13 @@ async def websocket_endpoint(websocket: WebSocket,
     await manager.connect(conversation_id, user_id, websocket)
     try:
         while True:
-            data = await websocket.receive_text()
-            print(f"Message text was: {data}")
+            await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect_global(user_id, websocket)
         # await manager.broadcast(f"Client #{client_id} left the chat")
+
+
+# default homepage
+@app.get("/", name="home page")
+def root(request : Request):
+    return templates.TemplateResponse("index.html", {"request": request})

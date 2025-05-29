@@ -1,17 +1,14 @@
 from datetime import timedelta, datetime
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
-from .schemas.user_base import UserCreate, UserInDB, UserOut
+from fastapi import  Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
-from .db.database import SessionLocal, get_db
-from .models import users
 from passlib.context import CryptContext
-from fastapi.security import HTTPAuthorizationCredentials, OAuth2PasswordRequestForm, OAuth2PasswordBearer, HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt, JWTError
-from .crud.user import crud
 import os
+
+from app.entities.user import User
+from .database import get_mysql_db
 
 # http_bearer for authentication
 http_bearer = HTTPBearer()
@@ -29,19 +26,22 @@ REFRESH_TOKEN_EXPIRE_DAYS=int(os.getenv('REFRESH_TOKEN_EXPIRE_DAYS'))
 # create access tokken
 def create_access_token(email : str, user_id: int):
     to_encode = {'sub':email, 'id':user_id}
-    expires = datetime.utcnow() +  timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({'exp': expires})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    expire = datetime.utcnow() +  timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    return create_token(to_encode, expire, SECRET_KEY)
 
 # create refresh token
 def create_refresh_token(user_id):
     to_encode = {'id':user_id}
     expire = datetime.utcnow() +  timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    return create_token(to_encode, expire, REFRESH_SECRET_KEY)
+
+def create_token(to_encode, expire, key):
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, REFRESH_SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, key, algorithm=ALGORITHM)
 
 # dependency get current user
-async def get_current_user(token_bearer: HTTPAuthorizationCredentials = Depends(http_bearer), db:Session= Depends(get_db)):
+async def get_current_user(token_bearer: HTTPAuthorizationCredentials = Depends(http_bearer), 
+                           db:Session= Depends(get_mysql_db)):
     try:
         print(token_bearer.credentials)
         token = token_bearer.credentials 
@@ -50,7 +50,7 @@ async def get_current_user(token_bearer: HTTPAuthorizationCredentials = Depends(
         user_id: int = payload.get('id')
         if email is None or user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate user')
-        return crud.get_one(db, crud._model.email == email)
+        return db.query(User).filter(User.email == email).first()
         
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not valitdate user')
@@ -71,11 +71,3 @@ def decode_refresh_token(refresh_token:str):
     except JWTError:
         return None
 
-
-def authenticate_user(email : str, password : str, db):
-    user = crud.find_user_by_email(db=db, email=email)
-    if not user:
-        return False
-    elif not bcrypt_context.verify(password, user.hashed_password):
-        return False
-    return user

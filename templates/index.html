@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon shortcut" href="{{ url_for('static', path='favicon.png') }}" type="image/x-icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Homepage</title>
+  <link rel="stylesheet" href="/static/index.css">
+</head>
+<body>
+  <div class="banner">
+    <div class="left">
+      <h1>FastAPI Messenger App</h1>
+      <h2>By Pham Bao Nghiem </h2>
+      <p>FastAPI Messenger App is a realtime chat backend application created with FastAPI, MySQL, MongoDB...</p>
+      <a href='/docs#/' ><button>GET STARTED</button></a>
+    </div>
+    <div class="right">
+      <div class="phone">
+        <div class="chat-bubble">Hey, are you coming today?</div>
+        <div class="chat-bubble sent">Yes! Just finishing up some work.</div>
+        <div class="chat-bubble">Cool! See you soon 👋</div>
+        <div class="chat-bubble sent">Looking forward to it 😄</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
