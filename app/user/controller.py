@@ -42,7 +42,7 @@ async def create_user_endpoint(user_create: UserCreate,
         return ObjectResponse(result=user)
     else:
         # return error if user already exists
-        return UserAlreadyExist()
+        raise UserAlreadyExist()
 
 @router.get("/{id}", 
             response_model=ObjectResponse[UserOut])
