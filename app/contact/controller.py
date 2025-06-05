@@ -142,7 +142,7 @@ async def update_contact(id : Annotated[int, Path()],
     if not contact:
         raise ContactNotFound()
     # check if user legit
-    if(user.id != contact.contact_user_id):
+    if(user.id != contact.contact_user_id & user.id != contact.user_id):
         raise NotAuthorized()
     # finally update contact
     contact.status = contact_type_dict[contact_update.action]

@@ -50,6 +50,7 @@ async def add_member_to_group(group_id : Annotated[int,  Path()],
     # finally create group_people
     group_people_in_db = GroupMemberInDB(**group_people_create.model_dump())
     group_member =  crud.create(db, group_people_in_db)
+    group_member = crud.convert_to_group_member_out(db, group_member)
     return ObjectResponse(result=group_member)
 
 

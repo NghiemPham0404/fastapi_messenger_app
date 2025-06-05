@@ -168,7 +168,7 @@ async def send_group_message(group_id : Annotated[int, Path()],
     # broadcast message to all users in the conversation
     if room_manager:
         await room_manager.broadcast_group(group_id, message_extended)
-    return message_extended
+    return ObjectResponse(result = message_extended)
 
 
 @router.put("/messages/{message_id}", 
@@ -195,6 +195,10 @@ async def update_message(message_id: Annotated[str, Path(description="message id
 
     if timestamp.tzinfo is None:
         timestamp = timestamp.replace(tzinfo=timezone.utc)
+
+    print(timestamp)
+    print(datetime.datetime.now(timezone.utc))
+    print(datetime.datetime.now(timezone.utc) - timestamp)
 
     if datetime.datetime.now(timezone.utc) - timestamp > timedelta(minutes=5):
         raise EditMessageTimeout()

@@ -11,9 +11,7 @@ class GroupMemberRepo(CRUDRepository):
         return db.query(GroupMember).filter(GroupMember.group_id == group_id, GroupMember.user_id == user_id).first()
     
     def get_group_members(self, db : Session, group_id : int, page : int = 1, limit : int = 20):
-        filter = (db.query(GroupMember)
-                .filter(GroupMember.group_id == group_id)
-                )
+        filter = {GroupMember.group_id == group_id}
         group_members_page = self.get_many(db, *filter, page = page, limit = limit)
         return group_members_page
 

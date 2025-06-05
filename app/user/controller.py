@@ -70,7 +70,10 @@ async def update_user_endpoint(id: Annotated[int, Path()],
     if user is None:
         raise UserNotFound()
     # update user
-    user_in_db = UserInDB(**user_update.model_dump(), hashed_password = bcrypt_context.hash(user_update.password))
+    user_in_db = UserInDB(**user_update.model_dump(exclude_defaults=True, 
+                                                   exclude_unset=True))
+    if user_update.password:
+        user_in_db.hashed_password = bcrypt_context.hash(user_update.password)
     user =  crud.update(db, user, user_in_db)
     return ObjectResponse(result=user)
 
@@ -104,7 +107,7 @@ async def get_user_groups(id: int,
 
 @router.put("/{id}/avatar",
             response_model=ObjectResponse[UserOut])
-def update_user_avatar_endpoint( 
+def update_user_avatar_endpoint(id : Annotated[int, Path()], 
                            avatar: Annotated[UploadFile, File(max=1024*5)],
                            user: UserInDB = Depends(get_current_user), 
                            db: Session = Depends(get_mysql_db)):
