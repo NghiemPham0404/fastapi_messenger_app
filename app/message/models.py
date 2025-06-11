@@ -30,10 +30,17 @@ class MessageSender(BaseModel):
 class MessageOut(MessageBase):
     # fixed attributes
     id : str
-    sender : MessageSender
+    user_id : int
 
     # optional attributes
     receiver_id : Optional[int] = None
-    group_id : Optional[int] = None 
+    group_id : Optional[int] = None
+
+    content : Optional[str] = None
+    timestamp : Optional[datetime.datetime] = datetime.datetime.now(datetime.timezone.utc)
+    file : Optional[str] = None
+    images : Optional[list[str]] = None 
+
+    sender : MessageSender
 
     model_config = ConfigDict(from_attributes=True)
