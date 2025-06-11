@@ -1,12 +1,15 @@
 from math import ceil
-import re
-
-from app.pagination import Page
-from app.response import ListResponse
-from ..entities.group_member import GroupMember
 from sqlalchemy.orm import Session
-from ..encrypt_message import decrypt_message
 from motor.motor_asyncio import AsyncIOMotorClient
+
+from .models import ConversationOut, Sender
+
+from ..entities.user import User
+from ..entities.group import Group
+from ..pagination import Page
+from ..response import ListResponse
+from ..entities.group_member import GroupMember
+from ..encrypt_message import decrypt_message
 from ..message.service import convert_to_message_extend
 
 class ConversationRepo:
@@ -58,7 +61,46 @@ class ConversationRepo:
                 results[group_id] = doc
 
         return list(results.values())
+    
+    async def convert_to_conversation_out(self, message: dict, user_id, db: Session):
+        if message.get("content"):
+            message["content"] = decrypt_message(message["content"])
 
+        message_sender_data = (
+            db.query(User.id, User.name, User.avatar)
+            .where(User.id == message["user_id"])
+            .first()
+        )
+
+        if message_sender_data:
+            message["sender"] = Sender.model_validate(message_sender_data)
+
+        # if message is a group messsage
+        if message.get("group_id"):
+            message_group_data = (
+                db.query(Group.id, Group.subject, Group.avatar)
+                .where(Group.id == message["group_id"])
+                .first()
+            )
+
+            message['display_name'] = message_group_data.subject
+            message['display_avatar'] = message_group_data.avatar
+
+        # if message is a direct conversation message
+        if message.get("receiver_id"):
+            display_user_id =  message.get("user_id") if message.get("receiver_id") == user_id else user_id 
+            message_receiver_data = (
+                db.query(User.id, User.name, User.avatar)
+                    .where(User.id == display_user_id)
+                    .first()
+            )
+
+            message['display_name'] = message_receiver_data.name
+            message['display_avatar'] = message_receiver_data.avatar
+
+        return ConversationOut.model_validate(message)
+
+        
 
     async def get_recent_conversations(self, user_id: int, mysql_db: Session, mongo_db :  AsyncIOMotorClient):
         """
@@ -84,8 +126,8 @@ class ConversationRepo:
         all_recent = direct + groups
         all_recent.sort(key=lambda x: x["timestamp"], reverse=True)
         for doc in all_recent:
-            doc["id"] = str(doc["_id"])
-            doc = await convert_to_message_extend(doc, mysql_db)
+            doc["id"] = str(doc.pop("_id"))
+            doc = await self.convert_to_conversation_out(doc, user_id, mysql_db)
         return all_recent
     
     
@@ -111,7 +153,7 @@ class ConversationRepo:
         results = []
         
         async for doc in cursor:
-            doc["id"] = str(doc["_id"])
+            doc["id"] = str(doc.pop("_id"))
             doc = await convert_to_message_extend(doc, mysql_db)
             results.append(doc)
         
@@ -144,8 +186,7 @@ class ConversationRepo:
         total_pages = ceil(total_results / limit) if limit else 1
         
         async for doc in cursor:
-            doc["id"] = str(doc["_id"])
-            doc.pop("_id")
+            doc["id"] = str(doc.pop("_id"))
             doc = await convert_to_message_extend(doc, mysql_db)
             results.append(doc)
         

@@ -15,7 +15,7 @@ from ..group_member.exceptions import NotGroupMember
 
 router = APIRouter(tags=['Conversation & chat history'])
 
-@router.get("/users/{user_id}/conversations")
+@router.get("/users/{user_id}/conversations", response_model=list[ConversationOut])
 async def get_recent_conversations_messages(user_id : Annotated[int, Path()],
                                             user : Annotated[UserOut, Depends(get_current_user)], 
                                             mongo_db : Annotated[AsyncIOMotorClient, Depends(get_mongo_db)],
