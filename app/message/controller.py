@@ -29,7 +29,7 @@ from ..response import MessageResponse, ObjectResponse
 router = APIRouter(tags=["Messages"])
 
 
-@router.post("/messsages", 
+@router.post("/messages", 
              response_model=ObjectResponse[MessageOut])
 async def send_direct_message(
                               message_create : Annotated[
@@ -94,7 +94,7 @@ async def send_direct_message(
     return ObjectResponse(result = message_extended)
 
 
-@router.post("/groups/{group_id}/messsages", 
+@router.post("/groups/{group_id}/messages", 
              response_model=ObjectResponse[MessageOut])
 async def send_group_message(group_id : Annotated[int, Path()],
                               message_create : Annotated[
@@ -244,4 +244,3 @@ async def delete_message(message_id: Annotated[str, Path(description="message id
         return {"success" : True,"message":"Message deleted successfully"}
     else:
         return {"success" : False, "message":"Message deleted unsuccessfully"}
-    

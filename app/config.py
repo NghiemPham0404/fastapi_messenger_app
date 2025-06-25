@@ -18,7 +18,8 @@ def custom_openapi(app):
     openapi_schema = get_openapi(
         title="FastAPI Messenger API",
         version="0.1.0",
-        description="Messenger is a realtime chat backend application created with FastAPI, MySQL, MongoDB...\nThis api require authorization via JWT",
+        description="Messenger is a realtime chat backend application created with FastAPI," \
+        " MySQL, MongoDB...\nThis api require authorization via JWT",
         routes=app.routes,
     )
     openapi_schema["components"]["securitySchemes"] = {
@@ -33,8 +34,8 @@ def custom_openapi(app):
         # break part to parts 'api/user/1' = > ['api', 'user', '1']
         path_parts = route.path.strip("/").split("/") 
         # skip the versioning 'api/user/1' => '/user/1'
-        sub_path = "/" + "/".join(path_parts[1:])
-        if sub_path not in ["/","/auth/token", "/auth/sign-up","/auth/refresh","/docs", "/openapi.json"]:
+        sub_path = "/" + "/".join(path_parts[2:])
+        if sub_path not in ["/","/docs", "/openapi.json"] and not sub_path.startswith("/auth/"):
             if hasattr(route, "operation_id"):
                 path = openapi_schema["paths"][route.path]
                 for method in path:

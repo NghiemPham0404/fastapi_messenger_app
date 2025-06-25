@@ -4,7 +4,7 @@ import cloudinary.uploader
 from fastapi import APIRouter, Depends, File, HTTPException, Path, Query, UploadFile
 from sqlalchemy.orm import Session
 
-from .models import UserCreate, UserOut, UserUpdate, UserInDB
+from .models import UserCreate, UserOut, UserUpdate, UserInDB, UserOutExtend
 from .exceptions import UploadAvatarFail, UserAlreadyExist, UserNotFound
 from .service import crud
 
@@ -17,16 +17,17 @@ from ..config import load_cloudinay_config
 
 router = APIRouter(prefix="/users", tags=["User"])
 
-@router.get("/", response_model=ListResponse[UserOut])
+@router.get("/", response_model=ListResponse[UserOutExtend])
 async def get_users_endpoint(keyword : Annotated[str, Query()] = "",
                              page : int = 1,
+                             limit : int = 20,
                              db: Session = Depends(get_mysql_db),
+                             user: UserOut = Depends(get_current_user),
                              ):
     """
     Get users
     """
-    users_page =  crud.get_users(db, keyword, page)
-    return ListResponse(**users_page.model_dump(), results=users_page.items)
+    return crud.get_users(db, keyword, user.id, page, limit)
 
 
 @router.post("/", response_model=ObjectResponse[UserOut])
@@ -45,16 +46,21 @@ async def create_user_endpoint(user_create: UserCreate,
         raise UserAlreadyExist()
 
 @router.get("/{id}", 
-            response_model=ObjectResponse[UserOut])
+            response_model=ObjectResponse[UserOutExtend])
 async def get_user_endpoint(id: Annotated[int, Path()], 
-                            db: Session = Depends(get_mysql_db)):
+                            db: Session = Depends(get_mysql_db),
+                            current_user: UserOut = Depends(get_current_user),
+                            ):
     """
     Get user by id
     """
     user = crud.get_one(db, crud._model.id == id)
+
     if user is None:
         raise UserNotFound()
-    return ObjectResponse(result=user)
+    
+    user_extend = crud.convert_user_to_user_extend(db, user, current_user.id)
+    return ObjectResponse(result=user_extend)
     
 
 @router.put("/{id}", 

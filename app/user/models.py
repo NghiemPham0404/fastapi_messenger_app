@@ -20,6 +20,16 @@ class UserOut(BaseModel):
     avatar : Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
+class Relationship(BaseModel):
+    contact_status : int = -1
+    is_sent_request : bool = False
+    model_config = ConfigDict(from_attributes=True)
+
+class UserOutExtend(UserOut):
+   relationship : Relationship
+   model_config = ConfigDict(from_attributes=True)
+
+
 class UserInDB(UserBase):
     hashed_password :  Optional[str] = None
     avatar : Optional[str] = None

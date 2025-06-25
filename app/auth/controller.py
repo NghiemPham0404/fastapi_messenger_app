@@ -1,3 +1,5 @@
+import os
+
 from typing import Annotated
 from fastapi import APIRouter, Body, Depends
 from sqlalchemy.orm import Session
@@ -23,18 +25,18 @@ from ..security import (bcrypt_context,
                         create_refresh_token)
 
 router = APIRouter(
-    prefix="/auth",
+    prefix="",
     tags=['SignUp & Authorization']
 )
 
-@router.post("/token", 
+@router.post("/auth/token", 
             response_model=Token,
             status_code=status.HTTP_202_ACCEPTED,
             name="login for jwt token")
 async def login_for_access_token(form_data : Annotated[LoginWithEmailForm, 
                                 Body(example={
-                                        "email":"test@gmail.com",
-                                        "password":"123123"
+                                        "email": os.getenv("TEST_USERNAME"),
+                                        "password": os.getenv("TEST_PASSWORD")
                                     }
                                 )], 
                                 db:Annotated[Session, Depends(get_mysql_db)]):
@@ -59,7 +61,7 @@ async def get_user_info(user: UserOut = Depends(get_current_user)):
     return ObjectResponse(result=user)
 
 
-@router.post("/sign-up",
+@router.post("/auth/sign-up",
             response_model=ObjectResponse[UserOut],
             status_code=status.HTTP_201_CREATED,
             name="sign up")
@@ -74,7 +76,7 @@ async def create_user(db : Annotated[Session, Depends(get_mysql_db)],
         return ObjectResponse(result=user)
 
 
-@router.post("/refresh", response_model=Token)
+@router.post("/auth/refresh", response_model=Token)
 async def refresh_token(refresh_body: RefreshTokenBody, 
                         db:Annotated[Session, Depends(get_mysql_db)]):
     refresh_token = refresh_body.refresh_token
