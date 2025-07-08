@@ -54,11 +54,12 @@ async def websocket_endpoint(websocket: WebSocket,
 
             if action == "join_group":
                 group_id = payload.get("group_id")
-                manager.join_group(group_id, user_id)
+                print(f"[WebSocket] try to join to group #{group_id}")
+                manager.join_group(user_id, group_id)
 
             elif action == "leave_group":
                 group_id = payload.get("group_id")
-                manager.leave_group(group_id, user_id)
+                manager.leave_group(user_id, group_id)
 
             else:
                 print(f"[WebSocket] Unknown action: {action}")

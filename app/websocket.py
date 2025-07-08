@@ -34,14 +34,16 @@ class ChatRoomManager:
 
 
     def join_group(self, user_id : int, group_id: int):
-        self.chat_rooms.setdefault(group_id, [])
+        self.group_chats.setdefault(group_id, [])
         if group_id in self.group_chats:
-            if user_id not in self.chat_rooms[group_id]:
-                self.chat_rooms[group_id].append(user_id)
+            if user_id not in self.group_chats[group_id]:
+                self.group_chats[group_id].append(user_id)
                 print(f"User #{user_id} connected to group #${group_id} successfully")
+        else:
+            print(f"group #{group_id} not exist and create unsucessfully")
 
 
-    def leave_group(self, group_id: int, user_id: int):
+    def leave_group(self, user_id: int, group_id: int):
         if group_id in self.group_chats and user_id in self.group_chats[group_id]:
             self.group_chats[group_id].remove(user_id)
             print(f"User #{user_id} disconnected from group #{group_id}.")

@@ -71,7 +71,11 @@ async def create_user(db : Annotated[Session, Depends(get_mysql_db)],
     if user:
         raise SignUpUserExist()
     else:
-        user_in_db = UserInDB(**user_sign_up.model_dump(), hashed_password = bcrypt_context.hash(user_sign_up.password))
+        user_in_db = UserInDB(
+            **user_sign_up.model_dump(), 
+            hashed_password = bcrypt_context.hash(user_sign_up.password),
+            avatar = f"https://api.dicebear.com/9.x/initials/png?seed={user_sign_up.name}&backgoundType=gradientLinear"
+            )
         user =  service.signUpUser(db, user_in_db)
         return ObjectResponse(result=user)
 

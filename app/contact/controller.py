@@ -112,6 +112,7 @@ async def send_contact_request(user : Annotated[UserOut, Depends(get_current_use
     # finally create contact
     contact_in_db = ContactInDB(**contact_create.model_dump())
     contact =  crud.create(db, contact_in_db)
+    contact = crud.convert_contact_to_contact_out(contact, user.id ,db = db)
     return ObjectResponse(result=contact)
 
 @router.put("/{id}", 
@@ -168,5 +169,6 @@ async def delete_contact_request(user : Annotated[UserOut, Depends(get_current_u
     # check if user legit
     if contact.user_id != user_id and contact.contact_user_id != user_id:
         raise NotAuthorized()
-    # finally delete contact
-    return MessageResponse(success=True, message="contact deleted successfully")
+    # finally delete contact 
+    # crud.delete(contact) # real
+    return MessageResponse(success=True, message="contact deleted successfully") # mock

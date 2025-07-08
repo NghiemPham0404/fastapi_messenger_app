@@ -21,6 +21,7 @@ class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class Relationship(BaseModel):
+    contact_id : Optional[int] = None
     contact_status : int = -1
     is_sent_request : bool = False
     model_config = ConfigDict(from_attributes=True)

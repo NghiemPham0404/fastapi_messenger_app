@@ -79,13 +79,14 @@ class UserRepository(CRUDRepository):
                     .first()
                 )
         contact_status = contact.status if contact else -1
+        contact_id = contact.id if contact else -1
 
         if(contact_status == 0):
             is_sent_request = True if result_user.id == contact.contact_user_id else False
         else:
             is_sent_request = False
 
-        result_user.relationship = Relationship(contact_status=contact_status, 
+        result_user.relationship = Relationship(contact_id= contact_id, contact_status=contact_status, 
                                                 is_sent_request=is_sent_request)
         
         return UserOutExtend.model_validate(result_user)
