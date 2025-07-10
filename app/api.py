@@ -6,6 +6,7 @@ from .group_member.controller import router as group_member_router
 from .message.controller import router as message_router
 from .contact.controller import router as contact_router
 from .conversation.controller import router as conversation_router
+from .media_file.controller import router as media_file_controller
 
 def include_routes(app : FastAPI):
     v1_routers = [auth_router,
@@ -15,6 +16,7 @@ def include_routes(app : FastAPI):
                 group_member_router,
                 conversation_router,
                 message_router,
+                media_file_controller
                 ]
     for router in v1_routers:
         app.include_router(router, prefix="/api/v1")
