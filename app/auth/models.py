@@ -29,3 +29,15 @@ class RefreshTokenBody(BaseModel):
     refresh_token : str
 
 
+class GoogleLoginRequest(BaseModel):
+    email : str
+    username : str
+    avatar : str
+    provider : str = "Google"
+    provider_id : str
+
+class AuthProviderInDB(BaseModel):
+    user_id : int
+    provider : str
+    provider_id : str
+
