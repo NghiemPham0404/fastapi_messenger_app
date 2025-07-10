@@ -13,7 +13,10 @@ from .service import service
 from .models import (LoginWithEmailForm, 
                     Token, 
                     SignUpWithEmailForm, 
-                    RefreshTokenBody)
+                    RefreshTokenBody,
+                    GoogleLoginRequest,
+                    AuthProviderInDB, 
+                    )
 
 from ..user.models import UserInDB, UserOut
 from ..database import get_mysql_db
@@ -76,7 +79,7 @@ async def create_user(db : Annotated[Session, Depends(get_mysql_db)],
             hashed_password = bcrypt_context.hash(user_sign_up.password),
             avatar = f"https://api.dicebear.com/9.x/initials/png?seed={user_sign_up.name}&backgoundType=gradientLinear"
             )
-        user =  service.signUpUser(db, user_in_db)
+        user =  service.sign_up_user(db, user_in_db)
         return ObjectResponse(result=user)
 
 
@@ -97,3 +100,36 @@ async def refresh_token(refresh_body: RefreshTokenBody,
                     token_type="bearer", 
                     refresh_token=new_refresh_token
                     )
+
+
+@router.post("/auth/google", response_model=Token)
+async def authen_user_by_google(google_info_payload : Annotated[GoogleLoginRequest, Body()],
+                                db:Annotated[Session, Depends(get_mysql_db)]):
+        
+        user = service.find_user_by_provider_id(db=db, provider_id=google_info_payload.provider_id)
+        
+        if user is None:
+            #If user credentials have not exist yet
+            
+            user_in_db =  UserInDB(
+                name = google_info_payload.username,
+                email = google_info_payload.email,
+                avatar= google_info_payload.avatar               
+            )
+            user = service.sign_up_user(db=db, user_in_db=user_in_db)
+            
+            auth_provider_in_db = AuthProviderInDB(
+                user_id = user.id,
+                provider = google_info_payload.provider,
+                provider_id = google_info_payload.provider_id
+            )
+            service.create_auth_provider(db=db, auth_in_db=auth_provider_in_db)
+
+
+        new_access_token = create_access_token(user.email, user.id)
+        new_refresh_token = create_refresh_token(user.id)
+        
+        return Token(access_token=new_access_token, 
+                        token_type="bearer", 
+                        refresh_token=new_refresh_token
+                        )
