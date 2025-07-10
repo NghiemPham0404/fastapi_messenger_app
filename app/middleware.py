@@ -20,10 +20,13 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         # break part to parts 'api/user/1' = > ['api', 'user', '1']
         path_parts = request.url.path.strip("/").split("/") 
         # skip the versioning 'api/user/1' => '/user/1'
-        sub_path = "/" + "/".join(path_parts[1:])
+        sub_path = "/" + "/".join(path_parts[2:])
 
         # skip the public enpoint
-        if sub_path in ["/","/docs", "/openapi.json","/favicon.ico","/auth/token","/auth/sign-up","/auth/refresh"]: 
+        if sub_path in ["/","/docs", "/openapi.json","/favicon.ico"]: 
+            return await call_next(request)
+        
+        if sub_path.startswith("/auth/"):
             return await call_next(request)
 
 

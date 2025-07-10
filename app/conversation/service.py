@@ -88,7 +88,7 @@ class ConversationRepo:
 
         # if message is a direct conversation message
         if message.get("receiver_id"):
-            display_user_id =  message.get("user_id") if message.get("receiver_id") == user_id else user_id 
+            display_user_id =  message.get("user_id") if message.get("receiver_id") == user_id else message.get("receiver_id")
             message_receiver_data = (
                 db.query(User.id, User.name, User.avatar)
                     .where(User.id == display_user_id)

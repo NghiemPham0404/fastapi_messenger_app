@@ -17,7 +17,7 @@ def include_routes(app : FastAPI):
                 message_router,
                 ]
     for router in v1_routers:
-        app.include_router(router, prefix="/v1")
+        app.include_router(router, prefix="/api/v1")
 
     
 

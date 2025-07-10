@@ -34,23 +34,38 @@ Base.metadata.create_all(bind=engine)
 app.openapi = lambda : custom_openapi(app)
 
 # configure websocket
-@app.websocket("/ws/{conversation_id}/{user_id}")
+@app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket,
-                            conversation_id:int, 
                             user_id: int, 
                             manager:ChatRoomManager = Depends(getChatRoomsManager)):
+    
     token = websocket.headers.get("Authorization")
     if not token or not token.startswith("Bearer "):
-        print("Not found token in websocket request")
-    else:
-        print("found token in request")
-    await manager.connect(conversation_id, user_id, websocket)
+        print("[WebSocket] Missing or invalid token")
+        return
+    
+    await manager.connect(user_id, websocket)
     try:
         while True:
-            await websocket.receive_text()
+            # Receive a json message from the frontend to determine action
+            data = await websocket.receive_json()
+            action = data.get("action")
+            payload = data.get("payload")
+
+            if action == "join_group":
+                group_id = payload.get("group_id")
+                print(f"[WebSocket] try to join to group #{group_id}")
+                manager.join_group(user_id, group_id)
+
+            elif action == "leave_group":
+                group_id = payload.get("group_id")
+                manager.leave_group(user_id, group_id)
+
+            else:
+                print(f"[WebSocket] Unknown action: {action}")
+
     except WebSocketDisconnect:
-        manager.disconnect_global(user_id, websocket)
-        # await manager.broadcast(f"Client #{client_id} left the chat")
+        manager.disconnect_global(user_id)
 
 
 # default homepage
