@@ -16,8 +16,8 @@ class MediaFileService():
         upload_result = cloudinary.uploader.upload(
             file.file,
             use_filename = True,
+            filename_override = file.filename,
             resource_type="raw",
-            filename=file.filename,
             folder="files",
         )
         return upload_result
@@ -28,6 +28,7 @@ class MediaFileService():
             image.file,
             use_filename = True,
             resource_type="image",
+            filename_override = image.filename,
             folder="images",
         )
         return upload_result

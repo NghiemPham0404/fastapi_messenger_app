@@ -35,3 +35,5 @@ class FileUploadOut(BaseModel):
     file_url : str
     display_name : str
     original_filename : str
+    format : str = None
+    size : int = 0

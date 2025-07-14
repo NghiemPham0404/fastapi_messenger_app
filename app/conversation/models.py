@@ -21,7 +21,7 @@ class ConversationOut(BaseModel):
     group_id : Optional[int] = None
     receiver_id : Optional[int] = None 
 
-    content : Optional[str]
+    content : Optional[str] = None
     timestamp : datetime.datetime
 
     sender : Sender
