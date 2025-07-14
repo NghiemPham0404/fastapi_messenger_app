@@ -3,11 +3,17 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from ..user.models import UserOut
 
+class FileMetadata(BaseModel):
+    url: str
+    name: str
+    format: str
+    size : int
+
 class MessageBase(BaseModel):
     user_id : int
     content : Optional[str] = None
     timestamp : Optional[datetime.datetime] = datetime.datetime.now(datetime.timezone.utc)
-    file : Optional[str] = None
+    file : Optional[FileMetadata] = None
     images : Optional[list[str]] = None
 
 class DirectMessageCreate(MessageBase):
@@ -38,7 +44,7 @@ class MessageOut(MessageBase):
 
     content : Optional[str] = None
     timestamp : Optional[datetime.datetime] = datetime.datetime.now(datetime.timezone.utc)
-    file : Optional[str] = None
+    file : Optional[FileMetadata] = None
     images : Optional[list[str]] = None 
 
     sender : MessageSender

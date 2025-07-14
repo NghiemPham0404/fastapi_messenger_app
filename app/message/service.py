@@ -9,7 +9,8 @@ from ..encrypt_message import encrypt_message, decrypt_message
 message_collection = mongodb['messages']
 
 async def create(message_create : dict):
-    message_create.content =  encrypt_message(message_create.content)
+    if message_create.content:
+        message_create.content =  encrypt_message(message_create.content)
     message = message_create.model_dump(exclude_none=True, exclude_unset=True)
     message["timestamp"] = message.get("timestamp") or datetime.datetime.utcnow()
     result = await message_collection.insert_one(message)
@@ -70,7 +71,8 @@ async def delete(id: str):
     return result.deleted_count == 1
 
 async def convert_to_message_extend(message: dict, db: Session):
-    message["content"] = decrypt_message(message["content"])
+    if message.get("content"):
+        message["content"] = decrypt_message(message["content"])
 
     message_extended_data = (
         db.query(User.id, User.name, User.avatar)

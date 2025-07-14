@@ -48,7 +48,7 @@ def validate_file_size(file : UploadFile):
     file.file.seek(0)
 
 
-@router.post("/image", response_model = ObjectResponse[ImageUploadOut])
+@router.post("/images", response_model = ObjectResponse[ImageUploadOut])
 def send_image_to_server(image : Annotated[UploadFile, File()],
                          user = Depends(get_current_user),):
     
@@ -74,7 +74,7 @@ def send_image_to_server(image : Annotated[UploadFile, File()],
         raise UploadFileException(status_code=400, detail = upload_result.get("error").get("message"))
     
 
-@router.post("/file", response_model = ObjectResponse[FileUploadOut])
+@router.post("/files", response_model = ObjectResponse[FileUploadOut])
 def send_file_to_server(file : Annotated[UploadFile, File()],
                          user = Depends(get_current_user),):
     
@@ -86,11 +86,14 @@ def send_file_to_server(file : Annotated[UploadFile, File()],
     validate_file_size(file)
     
     upload_result = service.uploadFile(file)
+    print(upload_result)
     if upload_result.get("secure_url") is not None:
         uploaded_file = FileUploadOut(
             file_url = upload_result.get("secure_url"),
             original_filename=upload_result.get("original_filename"),
-            display_name=upload_result.get("display_name"),                   
+            display_name=upload_result.get("display_name"),
+            format = upload_result.get("display_name").split(".")[-1] or "unknown",
+            size = int(upload_result.get("bytes") or upload_result.get("byte") or 0)         
         )
         return ObjectResponse(result= uploaded_file)
     else:
