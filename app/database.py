@@ -11,7 +11,8 @@ Base = declarative_base()
 
 
 MYSQL_DATABASE_URL =  os.getenv("MYSQL_DATABASE_URL")
-engine = create_engine(url= MYSQL_DATABASE_URL)
+engine = create_engine(url= MYSQL_DATABASE_URL, pool_pre_ping=True,
+    pool_recycle=1800)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
