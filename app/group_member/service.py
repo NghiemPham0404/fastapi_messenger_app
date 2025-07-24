@@ -10,8 +10,8 @@ class GroupMemberRepo(CRUDRepository):
     def validate_group_member(self, user_id: int, group_id : int, db : Session):
         return db.query(GroupMember).filter(GroupMember.group_id == group_id, GroupMember.user_id == user_id).first()
     
-    def get_group_members(self, db : Session, group_id : int, page : int = 1, limit : int = 20):
-        filter = {GroupMember.group_id == group_id}
+    def get_group_members(self, db : Session, group_id : int, status : int, page : int = 1, limit : int = 20):
+        filter = (GroupMember.group_id == group_id, GroupMember.status == status)
         group_members_page = self.get_many(db, *filter, page = page, limit = limit)
         return group_members_page
 

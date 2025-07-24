@@ -101,14 +101,21 @@ async def delete_user_endpoint(id: Annotated[int, Path()],
 async def get_user_groups(id: int,
                                 db: Session = Depends(get_mysql_db), 
                                 user: UserOut = Depends(get_current_user),
+                                status : Annotated[int, Query()] = 1,
                                 page: int = 1,
                                 ):
     """
-    Get all groups that a user have joined
+    Get all groups of a user
+    
+    params:
+    - status:
+        - 1 : joined group
+        - 0 : being invited to join
+        - 2 : requested to join and waiting to be accepted by groupd-admin 
     """
     if id != user.id:
         raise NotAuthorized()
-    group_page =  crud.get_user_groups(db, user.id, page)
+    group_page =  crud.get_user_groups(db, user.id, status, page)
     return ListResponse(**group_page .model_dump(), results= group_page .items)
 
 @router.put("/{id}/avatar",

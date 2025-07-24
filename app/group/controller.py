@@ -36,6 +36,8 @@ def create_group(group_create : GroupCreate,
     """
     Create a group
     """
+    if group_create.avatar is None:
+        group_create.avatar = f"https://api.dicebear.com/9.x/initials/png?seed={group_create.subject}&backgoundType=gradientLinear"
     group_in_db =  GroupInDB(**group_create.model_dump()) 
     group = crud.create(db, group_in_db)
     return ObjectResponse(result = group)
@@ -50,6 +52,8 @@ def get_group(id : Annotated[int, Path(description="group id")],
     Get a group by id
     """
     group = crud.get_one(db, crud._model.id == id)
+
+    group.members_count = crud.get_group_member_count(db, group.id)
     if not group:
         raise GroupNotFound()
     return ObjectResponse(result = group)
@@ -70,6 +74,7 @@ def update_group(id : Annotated[int, Path(description="group id")],
     # update group
     group_in_db =  GroupInDB(**group_update.model_dump()) 
     group =  crud.update(db, group, group_in_db)
+    group.members_count = crud.get_group_member_count(db, group.id)
     return ObjectResponse(result = group)
 
 

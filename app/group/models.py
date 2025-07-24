@@ -5,7 +5,7 @@ class GroupBase(BaseModel):
     subject: str
     
 class GroupCreate(GroupBase):
-    pass
+    avatar : Optional[str] = None
 
 class GroupUpdate(GroupBase):
     avatar : Optional[str] = None
@@ -18,6 +18,7 @@ class GroupOut(BaseModel):
     avatar : Optional[str] = None
     is_public : bool
     is_member_mute : bool
+    members_count : Optional[int] =  0
     model_config = ConfigDict(from_attributes=True)
 
 class GroupInDB(GroupBase):
