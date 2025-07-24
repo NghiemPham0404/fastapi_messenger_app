@@ -5,8 +5,8 @@ class GroupMember(Base):
     __tablename__ = 'group_member'
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("user.id"))
-    group_id = Column(Integer, ForeignKey("group.id"))
+    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE", onupdate="CASCADE"))
+    group_id = Column(Integer, ForeignKey("group.id", ondelete="CASCADE", onupdate="CASCADE"))
     is_host = Column(Boolean, default=False, nullable=False)
     is_sub_host = Column(Boolean, default=False, nullable = False)
     status = Column(Integer, default=0)

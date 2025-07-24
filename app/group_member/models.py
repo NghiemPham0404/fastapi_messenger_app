@@ -7,9 +7,10 @@ class GroupMemberBase(BaseModel):
 
 class GroupMemberCreate(GroupMemberBase):
     is_host : Optional[bool] = False
+    status : Optional[int] = 0
     pass
 
-class GroupMemberUpdate(GroupMemberBase):
+class GroupMemberUpdate(BaseModel):
     is_host : Optional[bool]
     is_sub_host : Optional[bool]
     status : Optional[int]
@@ -23,6 +24,13 @@ class Member(BaseModel):
     name : str
     avatar : Optional[str]
     model_config = ConfigDict(from_attributes=True)
+
+class GroupMemberCheck(BaseModel):
+    group_member_id : Optional[int] = None
+    user_id : int
+    is_host : bool
+    is_sub_host : bool
+    status : int
 
 class GroupMemberOut(GroupMemberBase):
     id : int

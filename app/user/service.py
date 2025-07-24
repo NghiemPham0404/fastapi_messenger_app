@@ -41,11 +41,11 @@ class UserRepository(CRUDRepository):
         return self.get_one(db, self._model.email == email)
     
     
-    def get_user_groups(self, db:Session, user_id : int, page, limit : int = 20):
+    def get_user_groups(self, db:Session, user_id : int, status : int = 1, page : int = 1, limit : int = 20):
         query =  (db.query(Group)
                 .join(GroupMember, Group.id == GroupMember.group_id)
                 .join(User, GroupMember.user_id ==  User.id)
-                .filter(User.id == user_id)
+                .filter(User.id == user_id, GroupMember.status == status)
                 )
         groups_page = crud.pagination_query(query, page, limit)
         return groups_page
