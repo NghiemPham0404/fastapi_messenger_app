@@ -83,6 +83,7 @@ class ConversationRepo:
                 .first()
             )
 
+            message['id'] = f"g{message.get('group_id')}"
             message['display_name'] = message_group_data.subject
             message['display_avatar'] = message_group_data.avatar
 
@@ -94,7 +95,8 @@ class ConversationRepo:
                     .where(User.id == display_user_id)
                     .first()
             )
-
+            
+            message['id'] = f"u{display_user_id}"
             message['display_name'] = message_receiver_data.name
             message['display_avatar'] = message_receiver_data.avatar
 
@@ -126,7 +128,6 @@ class ConversationRepo:
         all_recent = direct + groups
         all_recent.sort(key=lambda x: x["timestamp"], reverse=True)
         for doc in all_recent:
-            doc["id"] = str(doc.pop("_id"))
             doc = await self.convert_to_conversation_out(doc, user_id, mysql_db)
         return all_recent
     
