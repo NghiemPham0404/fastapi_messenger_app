@@ -24,7 +24,7 @@ from ..group.service import crud as group_crud
 from ..security import get_current_user
 from ..exceptions import NotAuthorized
 from ..response import MessageResponse, ObjectResponse
-
+from ..fcm_sender import send_message_to_user
 
 router = APIRouter(tags=["Messages"])
 
@@ -88,6 +88,7 @@ async def send_direct_message(
         
     # extend message to include user name and avatar
     message_extended = await convert_to_message_extend(message, db)
+    send_message_to_user(receiver_id, message_extended, db = db)
     # broadcast message to all users in the conversation
     if room_manager:
         await room_manager.broadcast(receiver_id, message_extended)
@@ -167,7 +168,12 @@ async def send_group_message(group_id : Annotated[int, Path()],
     message_extended = await convert_to_message_extend(message, db)
     # broadcast message to all users in the conversation
     if room_manager:
-        await room_manager.broadcast_group(group_id, message_extended)
+        group_members = group_member_repo.get_many(db, group_member_repo._model.group_id == group_id)
+        print(group_members)
+        group_members_ids = [ group_member.user_id for group_member in group_members.items]
+        for user_id in group_members_ids:
+            send_message_to_user(user_id, message_data=message_extended, db =db)
+        await room_manager.broadcast_group_v2(message=message_extended ,member_ids= group_members_ids)
     return ObjectResponse(result = message_extended)
 
 

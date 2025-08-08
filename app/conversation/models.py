@@ -1,6 +1,5 @@
 import datetime
 from typing import Optional
-from ..user.models import UserOut
 from pydantic import BaseModel, ConfigDict
 
 

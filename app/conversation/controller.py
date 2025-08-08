@@ -2,6 +2,8 @@ from typing import Annotated
 from fastapi import Depends, APIRouter, Path, Query
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from ..user.models import UserOut
+
 from .models import *
 from .service import conversation_repo
 

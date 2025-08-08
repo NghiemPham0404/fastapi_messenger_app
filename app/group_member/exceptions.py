@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 class NotGroupMember(HTTPException):
     def __init__(self):
         super().__init__(
-            detail="Unauthorized",
+            detail="You are not in this group yet",
             status_code=status.HTTP_401_UNAUTHORIZED
         )
 
