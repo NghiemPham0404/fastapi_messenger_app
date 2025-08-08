@@ -28,7 +28,7 @@ def get_mysql_db():
 
 
 MONGO_URL = os.getenv("MONGO_DB_URL")
-client = AsyncIOMotorClient(MONGO_URL)
+client = AsyncIOMotorClient(MONGO_URL, tz_aware=True)
 mongodb = client["chatting_app"]
 message_collection = mongodb["messages"]
 
