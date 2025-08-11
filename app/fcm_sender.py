@@ -9,7 +9,7 @@ from .message.models import MessageOut
 
 # Initialize
 PROJECT_ID = 'messenger-app-e9f0b'
-SERVICE_ACCOUNT_FILE = 'app/messenger-app-e9f0b-firebase-adminsdk-fbsvc-1b122d5486.json'
+SERVICE_ACCOUNT_FILE = 'messenger-app-e9f0b-firebase-adminsdk-fbsvc-1b122d5486.json'
 SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
 
 # get access-token from service account
